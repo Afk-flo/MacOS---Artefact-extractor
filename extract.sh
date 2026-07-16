@@ -76,7 +76,7 @@ who -a                                                         > "$IR/volatile/w
 last -50                                                       > "$IR/volatile/last.txt" 2>&1
 
 echo "[!] Taille "
-echo "$(du -sh $IR/volatile/*)"
+echo "$(du -sh $IR/volatile/* | sort -rh)"
 
 # === DUMP process (att!) === # 
 # ! tout n'est pas présent, pas le content
@@ -88,5 +88,30 @@ for pid in $(ps ax -o pid=); do
 done 
 
 echo "[!] Taille "
-echo "$(du -sh $IR/vmmaps/)" # pas chaque car ça peut monter à plusieurs centaines
+echo "$(du -sh $IR/vmmaps/)" # pas chaque car ça peut monter à plusieurs centaines (sur test 2/3Gb)
+
+
+# === Dump PID suspects (todo) === #
+
+# === Historiques Shell & Artefacts User === #
+echo " " 
+log "[5] Historiques shell" 
+
+for home in /Users/*; do
+    [ -d "$home" ] || continue
+
+    u="$(basename "$home")"
+    dst="$IR/history/$u"; mkdir -p "$dst"
+
+    for f in .bash_history .sh_history .bash_sessions .zsh_sessions .python_history; do
+        [ -e "$home/$f" ] && cp -a "$home/$f" "$dst/" 2>/dev/null 
+    done 
+    
+    # SSH 
+    [ -d "$home/.ssh" ] && cp -a "$home/.ssh" "$dst/ssh_dir" 2>/dev/null
+done 
+
+echo "[!] Taille "
+echo "$(du -sh $IR/history/)" 
+
 
